@@ -352,29 +352,35 @@ PORTD 7 portpin: sw1
 
 $20 $20 0 task: t:date&time   
 
-variable seconds
-variable minutes
-variable hours
+variable sec
+variable min
+variable hour
 variable day
 variable month
 variable year
 
+: DT.set ( Y m d H M S -- )
+  sec ! min ! hour ! day ! month ! year !
+;
+: DT.get ( -- )
+  sec @ min @ hour @ day @ month @ year @
+;
 : reset.clock ( -- )
-  0 seconds !
-  0 minutes !
-  0 hours !
-  1 days !
+  0 sec !
+  0 min !
+  0 hour !
+  1 day !
   1 month !
   2016 year !
 ;
 : day.month ( -- )
-	 1 days ! 1 month +!
+	 1 day ! 1 month +!
 ;
 : check.days ( day -- )
-	days @ u< if day.month then
+	day @ u< if day.month then
 ;
 : leapyear ( -- )
-	year @ 4 mod 0= year @ 100 mod 0= and year @ 400 mod 0= or 
+	year @ dup 4 mod 0= over 100 mod 0= and swap 400 mod 0= or 
 	if
 		29 check.days
 	else	
@@ -384,10 +390,10 @@ variable year
 \ runs every second
 : job-date&time
 	begin
-		1 seconds +!
-		seconds @ 59 > if 0 seconds ! 1 minutes +! then
-		minutes @ 59 > if 0 minutes ! 1 hours +! then
-		hours @ 24 > if 0 hours ! 1 day +! then
+		1 sec +!
+		sec @ 59 > if 0 sec ! 1 min +! then
+		min @ 59 > if 0 min ! 1 hour +! then
+		hours @ 24 > if 0 hour ! 1 day +! then
 		month @ case
 			0 of reset.clock endof
 			1 of 31 check.days endof
